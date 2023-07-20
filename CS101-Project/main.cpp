@@ -14,6 +14,13 @@ const int TOP_MARGIN = 20;
 const int BOTTOM_MARGIN = (PLAY_Y_HEIGHT+TOP_MARGIN);
 const int MAX_HEALTH = 3;
 
+const Color C1 = COLOR(255,105,180);
+const Color C2 = COLOR(255,192,203);
+const Color C3 = COLOR(0,0,0);
+const Color C = COLOR(255,215,0);
+int level =1;
+
+
 int SCORE = 0;
 
 
@@ -110,7 +117,11 @@ void removeIntersect(vector<Bubble> &bubbles, vector<Bullet> &bullets) {
             if (centerDistx <= (width/2)) { /*return true;*/ 
 
                 SCORE++;
-                bubbles.erase(bubbles.begin() + i); 
+                bubbles.erase(bubbles.begin() + i);
+                if (level>1 && circle_r > 14) {
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,100,0,C));
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,-100,0,C));
+                } 
                 bullets.erase(bullets.begin() + j); 
                 break;
             } 
@@ -118,6 +129,10 @@ void removeIntersect(vector<Bubble> &bubbles, vector<Bullet> &bullets) {
 
                 SCORE++;
                 bubbles.erase(bubbles.begin() + i); 
+                if (level>1 && circle_r > 14) {
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,100,0,C));
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,-100,0,C));
+                } 
                 bullets.erase(bullets.begin() + j); 
                 break;            
             }
@@ -129,6 +144,10 @@ void removeIntersect(vector<Bubble> &bubbles, vector<Bullet> &bullets) {
             
                 SCORE++;
                 bubbles.erase(bubbles.begin() + i); 
+                if (level>1 && circle_r > 14) {
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,100,0,C));
+                    bubbles.push_back(Bubble(circle_x, circle_y, circle_r/2,-100,0,C));
+                } 
                 bullets.erase(bullets.begin() + j); 
                 break; 
             }
@@ -141,6 +160,7 @@ int main()
 {
 
     double Time = 50;
+    
 
     initCanvas("Bubble Trouble", WINDOW_X, WINDOW_Y);
 
@@ -151,11 +171,13 @@ int main()
     string hlth_msg("Health:  3/3");
     string score_msg("Score: ");
     string time("Time: ");
+    string lvl("LEVEL: ");
 
     Text timeMsg(LEFT_MARGIN, TOP_MARGIN, time);
     Text charPressed(LEFT_MARGIN, BOTTOM_MARGIN, msg_cmd);
     Text HCntr(RIGHT_MARGIN, BOTTOM_MARGIN, hlth_msg);
     Text Score((LEFT_MARGIN + RIGHT_MARGIN)/2.0, BOTTOM_MARGIN, score_msg);
+    Text Lvl((WINDOW_X)/2.0, (WINDOW_Y)/2.0, lvl);
 
 
     // Intialize the shooter
@@ -204,7 +226,7 @@ int main()
                 str1 << shooter.get_health();
                 hlth_msg[hlth_msg.length() - 3] = str1.str()[0];
                 HCntr.setMessage(hlth_msg);
-                Text gameOver(WINDOW_X/2, WINDOW_Y/2, "Game Over, You Lose!");
+                Text gameOver(WINDOW_X/2, WINDOW_Y/2+10, "Game Over, You Lost!");
                 wait(10);
                 break;
             }
@@ -212,19 +234,21 @@ int main()
 
 
 
-        stringstream str1, str2, str3;
+        stringstream str1, str2, str3, l;
         str1 << shooter.get_health();
         str2 << SCORE;
         str3 << int(Time);
+        l << level;
 
         hlth_msg[hlth_msg.length() - 3] = str1.str()[0];
         HCntr.setMessage(hlth_msg);
         Score.setMessage(score_msg + str2.str());
+        Lvl.setMessage(lvl + l.str());
 
         if  ( i_t%50 == 0 ) {timeMsg.setMessage(time + str3.str()); }
 
         if (i_t == 2500) {
-            Text gameOver(WINDOW_X/2, WINDOW_Y/2, "Game Over, You Lose!");
+            Text gameOver(WINDOW_X/2, WINDOW_Y/2+10, "Game Over, You Lost!");
             wait(10);
             break;
         }
@@ -233,8 +257,16 @@ int main()
 
         removeIntersect(bubbles, bullets);
 
-        if (bubbles.size() == 0) {
-            Text won(WINDOW_X/2, WINDOW_Y/2, "Congrats!");
+        if (bubbles.size()==0 && level < 3) {
+            level++;
+            bubbles.push_back(Bubble(WINDOW_X/2.0, BUBBLE_START_Y, level*BUBBLE_DEFAULT_RADIUS
+                                    ,-BUBBLE_DEFAULT_VX, 0, level==2?C2:C3));
+            bubbles.push_back(Bubble(WINDOW_X/2.0, BUBBLE_START_Y, level*BUBBLE_DEFAULT_RADIUS
+                                    ,BUBBLE_DEFAULT_VX, 0, level==2?C2:C3));
+
+        }
+        else if (bubbles.size() == 0) {
+            Text won(WINDOW_X/2, WINDOW_Y/2 + 10, "Congrats!");
             wait(3);
 
         }
